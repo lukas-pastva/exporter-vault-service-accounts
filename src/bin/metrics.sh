@@ -52,9 +52,9 @@ collect_metrics() {
             # Escape the annotation value for label
             annotation_value_escaped=$(escape_label_value "$annotation_value")
             echo "vault_sa_alias_metadata_env{service_account=\"${sa_name_escaped}\",namespace=\"${sa_namespace_escaped}\",annotation_value=\"${annotation_value_escaped}\"} 1" >> "$TEMP_METRICS_FILE"
-        else
-            # Annotation is absent
-            echo "vault_sa_alias_metadata_env{service_account=\"${sa_name_escaped}\",namespace=\"${sa_namespace_escaped}\",annotation_value=\"\"} 0" >> "$TEMP_METRICS_FILE"
+        # else
+        #     # Annotation is absent
+        #     echo "vault_sa_alias_metadata_env{service_account=\"${sa_name_escaped}\",namespace=\"${sa_namespace_escaped}\",annotation_value=\"\"} 0" >> "$TEMP_METRICS_FILE"
         fi
     done
 }
