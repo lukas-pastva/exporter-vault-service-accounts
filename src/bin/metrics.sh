@@ -4,15 +4,10 @@
 # Configuration Variables
 # -------------------------------
 
-# Path where Prometheus Textfile Collector will read metrics
-METRICS_DIR="/var/lib/node_exporter/textfile_collector"
-METRICS_FILE="${METRICS_DIR}/sa_annotations.prom"
+METRICS_FILE="${METRICS_DIR}/metrics.log"
 
 # Target Annotation
 TARGET_ANNOTATION="vault.hashicorp.com/alias-metadata-env"
-
-# Ensure the metrics directory exists
-mkdir -p "$METRICS_DIR"
 
 # Temporary file to store metrics before writing
 TEMP_METRICS_FILE=$(mktemp)
@@ -33,8 +28,8 @@ escape_label_value() {
 
 # Function to write metrics header
 write_metrics_header() {
-    echo "# HELP sa_vault_alias_metadata_env Indicates the value of vault.hashicorp.com/alias-metadata-env annotation for the Service Account"
-    echo "# TYPE sa_vault_alias_metadata_env gauge"
+    echo "# HELP vault_sa_alias_metadata_env Indicates the value of vault.hashicorp.com/alias-metadata-env annotation for the Service Account"
+    echo "# TYPE vault_sa_alias_metadata_env gauge"
 }
 
 # Function to collect and process Service Accounts
@@ -56,10 +51,10 @@ collect_metrics() {
             # Annotation is present
             # Escape the annotation value for label
             annotation_value_escaped=$(escape_label_value "$annotation_value")
-            echo "sa_vault_alias_metadata_env{service_account=\"${sa_name_escaped}\",namespace=\"${sa_namespace_escaped}\",annotation_value=\"${annotation_value_escaped}\"} 1" >> "$TEMP_METRICS_FILE"
+            echo "vault_sa_alias_metadata_env{service_account=\"${sa_name_escaped}\",namespace=\"${sa_namespace_escaped}\",annotation_value=\"${annotation_value_escaped}\"} 1" >> "$TEMP_METRICS_FILE"
         else
             # Annotation is absent
-            echo "sa_vault_alias_metadata_env{service_account=\"${sa_name_escaped}\",namespace=\"${sa_namespace_escaped}\",annotation_value=\"\"} 0" >> "$TEMP_METRICS_FILE"
+            echo "vault_sa_alias_metadata_env{service_account=\"${sa_name_escaped}\",namespace=\"${sa_namespace_escaped}\",annotation_value=\"\"} 0" >> "$TEMP_METRICS_FILE"
         fi
     done
 }
