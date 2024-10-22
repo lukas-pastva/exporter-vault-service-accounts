@@ -4,7 +4,7 @@
 # Configuration Variables
 # -------------------------------
 
-METRICS_FILE="${METRICS_DIR}/metrics.log"
+METRICS_FILE="/tmp/metrics.log"
 
 # Target Annotation
 TARGET_ANNOTATION="vault.hashicorp.com/alias-metadata-env"
@@ -36,9 +36,13 @@ write_metrics_header() {
 collect_metrics() {
     # Fetch all Service Accounts with annotations
     kubectl get serviceaccounts --all-namespaces -o json | jq -c '.items[]' | while read -r sa; do
+        echo "Getting data for sa_name: ${sa}"
+
         sa_name=$(echo "$sa" | jq -r '.metadata.name')
         sa_namespace=$(echo "$sa" | jq -r '.metadata.namespace')
         annotations=$(echo "$sa" | jq -r '.metadata.annotations // empty')
+
+        echo "Getting data for sa_name: ${sa_namespace}/${sa_name}"
 
         # Check if the target annotation exists
         annotation_value=$(echo "$sa" | jq -r --arg anno "$TARGET_ANNOTATION" '.metadata.annotations[$anno] // empty')
