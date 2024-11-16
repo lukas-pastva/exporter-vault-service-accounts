@@ -28,8 +28,14 @@ escape_label_value() {
 
 # Function to write metrics header
 write_metrics_header() {
-    echo "# HELP vault_sa_alias_metadata_env Indicates the value of vault.hashicorp.com/alias-metadata-env annotation for the Service Account"
+    echo "# HELP vault_sa_alias_metadata_env Indicates the count of forward slashes in the vault.hashicorp.com/alias-metadata-env annotation for the Service Account"
     echo "# TYPE vault_sa_alias_metadata_env gauge"
+}
+
+# Function to count forward slashes in a string
+count_forward_slashes() {
+    local str="$1"
+    echo -n "$str" | awk -F'/' '{print NF-1}'
 }
 
 # Function to collect and process Service Accounts
@@ -49,12 +55,13 @@ collect_metrics() {
 
         if [[ -n "$annotation_value" ]]; then
             # Annotation is present
-            # Escape the annotation value for label
             annotation_value_escaped=$(escape_label_value "$annotation_value")
-            echo "vault_sa_alias_metadata_env{service_account=\"${sa_name_escaped}\",namespace=\"${sa_namespace_escaped}\",annotation_value=\"${annotation_value_escaped}\"} 1" >> "$TEMP_METRICS_FILE"
-        # else
-        #     # Annotation is absent
-        #     echo "vault_sa_alias_metadata_env{service_account=\"${sa_name_escaped}\",namespace=\"${sa_namespace_escaped}\",annotation_value=\"\"} 0" >> "$TEMP_METRICS_FILE"
+
+            # Count the number of forward slashes in the annotation value
+            slash_count=$(count_forward_slashes "$annotation_value")
+
+            # Output the metric with the count
+            echo "vault_sa_alias_metadata_env{service_account=\"${sa_name_escaped}\",namespace=\"${sa_namespace_escaped}\",annotation_value=\"${annotation_value_escaped}\"} ${slash_count}" >> "$TEMP_METRICS_FILE"
         fi
     done
 }
